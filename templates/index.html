@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionamento</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+        }
+        .button-container, .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+        button, input[type="submit"] {
+            padding: 15px 25px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .form-container {
+            display: none;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Escolha um Server</h1>
+    <div class="button-container">
+        <button id="globalButton">Acessar na server global</button>
+        <button id="raspberryButton">Acessar pelo Raspberry Pi</button>
+    </div>
+    <div class="form-container" id="globalFormContainer">
+        <form action="http://54.144.57.105" method="get">
+            <input type="submit" value="AWS">
+        </form>
+    </div>
+    <div class="form-container" id="raspberryFormContainer">
+        <form action="http://localhost:8000/" method="get">
+            <input type="submit" value="Raspberry">
+        </form>
+    </div>
+    <script>
+        document.getElementById('globalButton').addEventListener('click', function() {
+            document.getElementById('globalFormContainer').style.display = 'flex';
+        });
+
+        document.getElementById('raspberryButton').addEventListener('click', function() {
+            document.getElementById('raspberryFormContainer').style.display = 'flex';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Conectar camera</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #0c1212, #1e2424);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            text-align: center;
+            font-weight: bold;
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        a {
+            animation: fadeIn 1s ease-in-out;
+            margin-bottom: 30px;
+            font-weight: bold;
+            display: block;
+        }
+
+        form {
+            width: 420px;
+            
+            padding: 50px 35px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        form * {
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            outline: none;
+            border: none;
+        }
+
+        .img-btn {
+            background-color: #00a94c;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .img-btn:hover {
+            background-color: #007b36;
+        }
+
+        .form-group {
+            margin-top: 20px;
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+            font-size: 16px;
+        }
+
+        .form-control {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 14px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        @media screen and (max-width: 760px) {
+            form {
+                width: 300px;
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .img-btn {
+                width: 100%;
+                padding: 10px 0;
+            }
+        }
+    </style>
+
+    </head>
+
+<body>
+    <form id="message-form" method="post">
+        <h1>CloudBoxIOT</h1>
+        <a>Simplifique a jornada dos seus dados</a>
+        
+        <input type="text" id="api" name="api" class="form-control" placeholder="URL da API" required>
+        <input type="text" id="rtsp" name="rtsp" class="form-control" placeholder="IP:PORTA RTSP" required>
+        <input type="number" id="chanel" name="chanel" class="form-control" placeholder="Canal" required>
+        <input type="text" id="user" name="user" class="form-control" placeholder="Usuario" required>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Senha" required>
+        
+        <div class="form-group">
+            <div class="form-check form-check-inline">
+               <input class="form-check-input" name="tipo" type="radio" id="padrao" name="mode" value="Padrao">
+               <label class="form-check-label" for="padrao">Padrao</label>
+            </div>
+            <div class="form-check form-check-inline">
+               <input class="form-check-input" type="radio" name="tipo" id="extra" name="mode" value="Extra">
+               <label class="form-check-label" for="extra">Extra</label>
+            </div>
+         </div>
+
+        
+        <button type="submit" class="img-btn">Entrar</button>
+    </form>
+    <div class="footer">
+        VMStudio4 &copy; Todos os direitos reservados
+    </div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Stream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Global styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c1212, #1e2e2e);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00d174;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        /* Styled button */
+        .btn-config {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #00d174;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-config i {
+            font-size: 1.2rem;
+        }
+
+        .btn-config:hover {
+            background-color: #00b364;
+            transform: scale(1.05);
+        }
+
+        /* Container for camera buttons */
+        .camera-buttons {
+            display: flex; /* Organiza os botões em linha */
+            justify-content: center; /* Centraliza os botões horizontalmente */
+            gap: 10px; /* Espaçamento entre os botões */
+            padding: 20px; /* Espaçamento interno */
+        }
+    
+        .camera-buttons button {
+            background-color: #fff; 
+            color: #00d174; /* Cor do texto */
+            padding: 10px 20px; /* Espaçamento interno dos botões */
+            border: none; /* Remove bordas */
+            border-radius: 5px; /* Borda arredondada */
+            cursor: pointer; /* Alteração do cursor para indicar que é clicável */
+            font-size: 25px; /* Tamanho da fonte */
+        }
+        
+        .camera-buttons button i {
+        margin-right: 8px; /* Espaçamento entre o ícone e o texto */
+        font-size: 20px; /* Tamanho do ícone */
+    }
+
+    
+        .camera-buttons button:hover {
+            background-color: #45a049; /* Cor de fundo ao passar o mouse */
+            color: white;
+        }
+
+        /* Information cards */
+        .info-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .info-card {
+            background-color: #1e2e2e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 200px;
+            text-align: center;
+        }
+
+        .info-card h3 {
+            margin-bottom: 10px;
+            color: #00d174;
+            font-size: 1.2rem;
+        }
+
+        .info-card p {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .btn-config, .camera-btn {
+                padding: 10px 18px;
+                font-size: 1rem;
+            }
+
+            .info-card {
+                width: 150px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn-config, .camera-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .info-card {
+                width: 120px;
+                padding: 10px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/login" class="btn-config">
+        <i class="fas fa-cog"></i> Configurar Câmera
+    </a>
+
+    <h1>Status CloudBoxIOT Vision</h1>
+
+    <!-- Display Information Cards -->
+    <div class="info-container">
+        <div class="info-card">
+            <h3>Tipo de Piso</h3>
+            <p id="floor-type">{piso}</p>
+        </div>
+        <div class="info-card">
+            <h3>Contagem Atual</h3>
+            <p id="current-count">{count}</p>
+        </div>
+        <div class="info-card">
+            <h3>Última Atualização</h3>
+            <p id="last-update">{update}</p>
+        </div>
+    </div>
+
+    <div class="camera-buttons">
+      <button onclick="redirectToStream()">
+        Acessar stream <i class="fas fa-arrow-right"></i>
+      </button>
+
+    </div>
+
+    <script>
+        const frameName = "{frame_name}";
+        
+        
+        function redirectToStream() {
+            window.location.href = `/video/video`;
+    }
+        
+        if (frameName) {
+            const eventSource = new EventSource(`/stream/${frameName}`);
+            eventSource.onmessage = function(event) {
+                var img = document.getElementById("stream");
+                img.src = "data:image/jpeg;base64," + event.data;
+
+                // Exemplo de atualização de informações dinâmicas:
+                document.getElementById("floor-type").innerText = "Cerâmica"; // Tipo de piso detectado
+                document.getElementById("current-count").innerText = 10; // Exemplo de contagem
+                document.getElementById("last-update").innerText = new Date().toLocaleTimeString(); // Atualiza o horário
+            };
+        }
+    </script>
+</body>
+</html>

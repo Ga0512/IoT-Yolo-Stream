@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <title>Contagem de pisos</title>
+    <style>
+        /* Global styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #0c1212, #1e2424);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #00a94c;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Container for the video stream */
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #00a94c;
+            
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 1px;
+            margin-bottom: 20px;
+        }
+
+        #stream {
+            width: 640px;
+            height: 480px;
+            object-fit: cover;
+            background-color: #000;
+        }
+
+        /* Styled button */
+        button {
+            background-color: #00a94c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            #stream {
+                width: 100%;
+                height: auto;
+            }
+
+            .video-container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <img id="stream" src="" alt="stream">
+    </div>
+    <button onclick="window.location.href = '/'">
+      <i class="fas fa-arrow-left"></i> Voltar para Home
+    </button>
+
+    <script>
+        const frameName = "{frame_name}";
+        
+        // Track page entry
+        fetch('/log_enter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ frame_name: frameName })
+        });
+
+        const eventSource = new EventSource(`/stream/${frameName}`);
+        eventSource.onmessage = function(event) {
+            var img = document.getElementById("stream");
+            img.src = "data:image/jpeg;base64," + event.data;
+        };
+
+        // Track page exit
+        window.addEventListener('beforeunload', function () {
+            navigator.sendBeacon('/log_exit', JSON.stringify({ frame_name: frameName }));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Vídeos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .folder {
+            margin: 20px 0;
+        }
+        .folder h2 {
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .folder h2:hover {
+            background-color: #e0e0e0;
+        }
+        .video-list {
+            list-style: none;
+            padding-left: 20px;
+            display: none;
+        }
+        .video-list li {
+            margin-bottom: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+        .arrow {
+            margin-left: auto;
+            transition: transform 0.3s;
+        }
+        .folder h2.expanded .arrow {
+            transform: rotate(360deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Vídeos</h1>
+    {% for folder, video_list in videos.items() %}
+        <div class="folder">
+            <h2 onclick="toggleVisibility('{{ folder }}')" id="header-{{ folder }}">
+                {{ folder }}
+                <span class="arrow" id="arrow-{{ folder }}">&#9650;</span>
+            </h2>
+            <ul class="video-list" id="{{ folder }}">
+                {% for video in video_list %}
+                    <li>
+                        <video controls>
+                            <source src="{{ url_for('download_file', folder=folder, filename=video) }}" type="video/mp4">
+                            Seu navegador não suporta a tag de vídeo.
+                        </video>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+    <script>
+        function toggleVisibility(folderId) {
+            var element = document.getElementById(folderId);
+            var header = document.getElementById('header-' + folderId);
+            var arrow = document.getElementById('arrow-' + folderId);
+            if (element.style.display === "none" || element.style.display === "") {
+                element.style.display = "block";
+                arrow.innerHTML = "&#9660;";
+                header.classList.add('expanded');
+            } else {
+                element.style.display = "none";
+                arrow.innerHTML = "&#9650;";
+                header.classList.remove('expanded');
+            }
+        }
+    </script>
+</body>
+</html>
