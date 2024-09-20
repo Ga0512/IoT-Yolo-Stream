@@ -28,7 +28,7 @@ templates.env.globals.update({
     'encoding': 'utf-8'
 })
 
-TEMPLATE_DIR = "templates"  # ou o diretÛrio onde os seus arquivos HTML est„o
+TEMPLATE_DIR = "templates"  # ou o diret√≥rio onde os seus arquivos HTML est√£o
 
 def load_html_template(filename):
     filepath = os.path.join(TEMPLATE_DIR, filename)
@@ -40,9 +40,9 @@ html_template = load_html_template("html_template.html")
 html_main = load_html_template("html_main.html")
 
 frame_data = {}
-active_users = set()  # Conjunto para rastrear usu·rios ativos
+active_users = set()  # Conjunto para rastrear usu√°rios ativos
 
-# ConfiguraÁ„o do modelo TFLite
+# Configura√ß√£o do modelo TFLite
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 limits = [5, 195, 281, 195]
 totalCount = []
@@ -160,7 +160,7 @@ def detect_video(weights, img_size, conf_thres, iou_thres):
             VideoCapture.update = data_hora_formatada
             
             # print('ENVIANDO POST API')
-            # post_api(len(totalCount), str(result_class_names[i]))  # Chama a funÁ„o post_api
+            # post_api(len(totalCount), str(result_class_names[i]))  # Chama a fun√ß√£o post_api
             # last_post_time = time.time()
           
           
@@ -258,9 +258,32 @@ async def stream(filename: str):
                     encoded_img = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
                     
                     yield f"data: {encoded_img}\n\n"
-            await asyncio.sleep(1/30)  # Ajuste o intervalo conforme necess·rio
+            await asyncio.sleep(1/30)  # Ajuste o intervalo conforme necess√°rio
 
     return StreamingResponse(new_frame(), media_type='text/event-stream')
+
+
+
+@app.get("/info_stream")
+async def info_stream():
+    async def event_generator():
+        while True:
+            # Construa um dicion√°rio com as informa√ß√µes desejadas
+            data = {
+                "piso": VideoCapture.tipo_piso,
+                "count": VideoCapture.count,
+                "update": VideoCapture.update
+            }
+            # Converta o dicion√°rio para JSON
+            json_data = json.dumps(data)
+            # Envie os dados JSON como uma string
+            yield f"data: {json_data}\n\n"
+            await asyncio.sleep(1)  # Intervalo de 1 segundo entre as atualiza√ß√µes
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+
 
 @app.get("/")
 @app.post("/")
@@ -272,10 +295,7 @@ async def index():
     buttons = ''.join([f'<button onclick="window.location.href=\'/video/{file}\'">{file}</button><br/>' for file in video_files])
     
     html_content = html_main.replace("{buttons}", buttons)\
-                        .replace("{frame_name}", "")\
-                        .replace("{piso}", VideoCapture.tipo_piso)\
-                        .replace("{count}", str(VideoCapture.count))\
-                        .replace("{update}", str(VideoCapture.update))
+                        .replace("{frame_name}", "")
 
     return HTMLResponse(html_content)
 
@@ -291,7 +311,7 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
     
-    # Inicializa a detecÁ„o em uma thread separada
+    # Inicializa a detec√ß√£o em uma thread separada
     detection_thread = threading.Thread(target=detect_video, args=(opt.weights, opt.img_size, opt.conf_thres, opt.iou_thres))
     detection_thread.start()
 
