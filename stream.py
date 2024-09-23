@@ -28,7 +28,7 @@ templates.env.globals.update({
     'encoding': 'utf-8'
 })
 
-TEMPLATE_DIR = "templates"  # ou o diret�rio onde os seus arquivos HTML est�o
+TEMPLATE_DIR = "templates"  # ou o diretório onde os seus arquivos HTML estão
 
 def load_html_template(filename):
     filepath = os.path.join(TEMPLATE_DIR, filename)
@@ -40,9 +40,9 @@ html_template = load_html_template("html_template.html")
 html_main = load_html_template("html_main.html")
 
 frame_data = {}
-active_users = set()  # Conjunto para rastrear usu�rios ativos
+active_users = set()  # Conjunto para rastrear usuários ativos
 
-# Configura��o do modelo TFLite
+# Configuração do modelo TFLite
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 limits = [5, 195, 281, 195]
 totalCount = []
@@ -76,34 +76,58 @@ class VideoCapture:
         frame_rate = self.cap.get(5)
         print('Camera FPS: {}'.format(frame_rate))
 
+
+
 def detect_video(weights, img_size, conf_thres, iou_thres):
     start_time = time.time()
+    last_modified_time = 0  # Timestamp da última modificação do arquivo
     
-    while not os.path.exists('dados.json'):
-        print("Arquivo dados.json nao encontrado.")
-        time.sleep(0.5)
-        
-    
-    with open("dados.json", "r") as json_file:
-        dados = json.load(json_file)
-
-    url = f"rtsp://{dados['user']}:{dados['senha']}@{dados['ip']}/cam/realmonitor?channel={dados['canal']}&subtype={dados['tipo']}"
-
-
-    video = VideoCapture(url)
+    video = None  # Inicializando o objeto VideoCapture
     yolov5_tflite_obj = yolov5_tflite(weights, img_size, conf_thres, iou_thres)
 
     size = (img_size, img_size)
     no_of_frames = 0
-    
     last_post_time = time.time()
-    
+
+    # Inicia o loop principal
     while True:
+        # Verifica se o arquivo foi modificado
+        if os.path.exists('dados.json'):
+            current_modified_time = os.path.getmtime('dados.json')
+
+            # Se o arquivo foi modificado, recarrega o conteúdo
+            if current_modified_time != last_modified_time:
+                last_modified_time = current_modified_time
+                print("Atualizando dados do arquivo dados.json.")
+                
+                # Carrega o arquivo dados.json
+                with open("dados.json", "r") as json_file:
+                    dados = json.load(json_file)
+
+                url = f"rtsp://{dados['user']}:{dados['senha']}@{dados['ip']}/cam/realmonitor?channel={dados['canal']}&subtype={dados['tipo']}"
+                
+                # Reinicializa o objeto VideoCapture se já estiver em uso
+                if video is not None:
+                    video.cap.release()  # Libera o vídeo atual
+                
+                video = VideoCapture(url)  # Inicia o novo stream com os dados atualizados
+        else:
+            print("Arquivo dados.json não encontrado.")
+            time.sleep(1)
+            continue
+
+        # Certifica-se de que o vídeo foi inicializado corretamente
+        if video is None:
+            print("Aguardando configuração inicial do vídeo...")
+            time.sleep(1)
+            continue
+
         frame = video.read()
-        
         if frame is None:
+            print("Nenhum frame capturado, saindo.")
             break
         
+        # Processamento do frame
         frame = cv2.resize(frame, size)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         no_of_frames += 1
@@ -111,67 +135,69 @@ def detect_video(weights, img_size, conf_thres, iou_thres):
         image_resized = letterbox_image(Image.fromarray(frame), size)
         image_array = np.asarray(image_resized)
         normalized_image_array = image_array.astype(np.float32) / 255.0
+        
+        # Detecta objetos no frame
         result_boxes, result_scores, result_class_names = yolov5_tflite_obj.detect(normalized_image_array)
         
         detections = np.empty((0, 5))
         if len(result_boxes) > 0:
-          result_boxes = scale_coords(size, np.array(result_boxes), size)
-          
-          for i, r in enumerate(result_boxes):
-              x1, y1 = int(r[0]), int(r[1])
-              x2, y2 = int(r[2]), int(r[3])
-              
-              currentArray = np.array([x1, y1, x2, y2, int(100 * result_scores[i])])
-              detections = np.vstack((detections, currentArray))
-              
-              org = (int(r[0]), int(r[1]))
-              cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-              cv2.putText(frame, str(int(100 * result_scores[i])) + '%  ' + str(result_class_names[i]), org,
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
-          
-              VideoCapture.tipo_piso = str(result_class_names[i])
+            result_boxes = scale_coords(size, np.array(result_boxes), size)
+            
+            for i, r in enumerate(result_boxes):
+                x1, y1 = int(r[0]), int(r[1])
+                x2, y2 = int(r[2]), int(r[3])
                 
+                currentArray = np.array([x1, y1, x2, y2, int(100 * result_scores[i])])
+                detections = np.vstack((detections, currentArray))
                 
-          resultsTracker = tracker.update(detections)
-          cv2.line(frame, (limits[0], limits[1]), (limits[2], limits[3]), (0, 0, 255), 2)
-  
-          for result in resultsTracker:
-              x1, y1, x2, y2, id = result
-              wb, hb = int(x2) - int(x1), int(y2) - int(y1)
-              cx, cy = int(x1 + wb // 2), int(y1 + hb // 2)
-              cv2.circle(frame, (cx, cy), 2, (255, 0, 255), cv2.FILLED)
-  
-              if limits[0] < cx < limits[2] and limits[1] - 5 < cy < limits[1] + 5:
-                  if id not in totalCount:
-                      totalCount.append(id)
-                      cv2.line(frame, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 2)
-                      cv2.circle(frame, (cx, cy), 2, (0, 255, 0), cv2.FILLED)
-          
-          cv2.putText(frame, str(len(totalCount)), (50, 50), cv2.FONT_HERSHEY_PLAIN, 1, (50, 50, 255), 2)
-          VideoCapture.count = len(totalCount)
-          
-          if len(totalCount) > 65535:
-            totalCount.clear()
+                org = (int(r[0]), int(r[1]))
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                cv2.putText(frame, f"{int(100 * result_scores[i])}%  {str(result_class_names[i])}", org,
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1, cv2.LINE_AA)
+                
+                VideoCapture.tipo_piso = str(result_class_names[i])
             
+            resultsTracker = tracker.update(detections)
+            limits = [100, 200, 300, 400]  # Presumindo valores fixos de limites, substitua conforme necessário
+            cv2.line(frame, (limits[0], limits[1]), (limits[2], limits[3]), (0, 0, 255), 2)
             
-          if time.time() - last_post_time >= 60:
-            data_hora_atual = datetime.now()
-            data_hora_formatada = data_hora_atual.strftime("%Y-%m-%d %H:%M:%S.%f")
-            VideoCapture.update = data_hora_formatada
+            for result in resultsTracker:
+                x1, y1, x2, y2, id = result
+                wb, hb = int(x2) - int(x1), int(y2) - int(y1)
+                cx, cy = int(x1 + wb // 2), int(y1 + hb // 2)
+                cv2.circle(frame, (cx, cy), 2, (255, 0, 255), cv2.FILLED)
+                
+                if limits[0] < cx < limits[2] and limits[1] - 5 < cy < limits[1] + 5:
+                    if id not in totalCount:
+                        totalCount.append(id)
+                        cv2.line(frame, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 2)
+                        cv2.circle(frame, (cx, cy), 2, (0, 255, 0), cv2.FILLED)
             
-            # print('ENVIANDO POST API')
-            # post_api(len(totalCount), str(result_class_names[i]))  # Chama a fun��o post_api
-            # last_post_time = time.time()
-          
-          
+            cv2.putText(frame, str(len(totalCount)), (50, 50), cv2.FONT_HERSHEY_PLAIN, 1, (50, 50, 255), 2)
+            VideoCapture.count = len(totalCount)
+            
+            if len(totalCount) > 65535:
+                totalCount.clear()
+            
+            if time.time() - last_post_time >= 60:
+                data_hora_atual = datetime.now()
+                data_hora_formatada = data_hora_atual.strftime("%Y-%m-%d %H:%M:%S.%f")
+                VideoCapture.update = data_hora_formatada
+                
+                # Chama a função post_api se necessário
+                # post_api(len(totalCount), str(result_class_names[i]))  
+                last_post_time = time.time()
+
         # Codifica o frame no formato JPEG
         ret, buffer = cv2.imencode('.jpg', frame)
         if ret:
             frame_data['video'] = buffer.tobytes()
         
+        # Calcula o FPS
         end_time = time.time()
         print('FPS:', 1 / (end_time - start_time))
         start_time = end_time
+
 
 '''@app.get("/home", response_class=HTMLResponse)
 async def index():
@@ -182,7 +208,24 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/login")
 async def login_get(request: Request):
-     return templates.TemplateResponse("login.html", {"request": request})
+    if os.path.exists('dados.json'):
+        
+        with open("dados.json", "r") as json_file:
+            dados = json.load(json_file)
+            
+            api_value = dados['api']
+            ip_value = dados['ip']
+            canal_value = dados['canal']
+            user_value = dados['user']
+    
+    else:
+        api_value = ''
+        ip_value = ''
+        canal_value = ''
+        user_value = ''
+
+    return templates.TemplateResponse("login.html", {"request": request, "api_value": api_value, "ip_value": ip_value, 
+                                                    "canal_value": canal_value, "user_value": user_value})
 
 @app.post("/login")
 async def login_post(
@@ -213,9 +256,7 @@ async def login_post(
         
     time.sleep(2.5)
     return RedirectResponse(url="/")
-
-
-        
+     
 
 @app.post("/log_enter")
 async def log_enter(request: Request):
@@ -258,9 +299,32 @@ async def stream(filename: str):
                     encoded_img = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
                     
                     yield f"data: {encoded_img}\n\n"
-            await asyncio.sleep(1/30)  # Ajuste o intervalo conforme necess�rio
+            await asyncio.sleep(1/30)  # Ajuste o intervalo conforme necessário
 
     return StreamingResponse(new_frame(), media_type='text/event-stream')
+
+
+
+@app.get("/info_stream")
+async def info_stream():
+    async def event_generator():
+        while True:
+            # Construa um dicionário com as informações desejadas
+            data = {
+                "piso": VideoCapture.tipo_piso,
+                "count": VideoCapture.count,
+                "update": VideoCapture.update
+            }
+            # Converta o dicionário para JSON
+            json_data = json.dumps(data)
+            # Envie os dados JSON como uma string
+            yield f"data: {json_data}\n\n"
+            await asyncio.sleep(1)  # Intervalo de 1 segundo entre as atualizações
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+
 
 @app.get("/")
 @app.post("/")
@@ -272,10 +336,7 @@ async def index():
     buttons = ''.join([f'<button onclick="window.location.href=\'/video/{file}\'">{file}</button><br/>' for file in video_files])
     
     html_content = html_main.replace("{buttons}", buttons)\
-                        .replace("{frame_name}", "")\
-                        .replace("{piso}", VideoCapture.tipo_piso)\
-                        .replace("{count}", str(VideoCapture.count))\
-                        .replace("{update}", str(VideoCapture.update))
+                        .replace("{frame_name}", "")
 
     return HTMLResponse(html_content)
 
@@ -291,10 +352,10 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
     
-    # Inicializa a detec��o em uma thread separada
+    # Inicializa a detecção em uma thread separada
     detection_thread = threading.Thread(target=detect_video, args=(opt.weights, opt.img_size, opt.conf_thres, opt.iou_thres))
     detection_thread.start()
 
-    uvicorn.run(app, host="192.168.23.4", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
     
     detection_thread.join()

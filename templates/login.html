@@ -38,7 +38,6 @@
 
         form {
             width: 420px;
-            
             padding: 50px 35px;
             text-align: center;
             margin: 30px 0;
@@ -104,6 +103,34 @@
             bottom: 0;
             width: 100%;
         }
+
+        /* Button "Voltar para Home" */
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #00d174;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .home-btn i {
+            font-size: 1.2rem;
+        }
+
+        .home-btn:hover {
+            background-color: #00b364;
+            transform: scale(1.05);
+        }
         
         @media screen and (max-width: 760px) {
             form {
@@ -119,20 +146,28 @@
                 width: 100%;
                 padding: 10px 0;
             }
+
+            .home-btn {
+                padding: 8px 15px;
+                font-size: 16px;
+            }
         }
     </style>
 
     </head>
 
 <body>
+    <!-- Botão "Voltar para Home" -->
+    <a href="/" class="home-btn">Voltar para Home</a>
+
     <form id="message-form" method="post">
         <h1>CloudBoxIOT</h1>
         <a>Simplifique a jornada dos seus dados</a>
         
-        <input type="text" id="api" name="api" class="form-control" placeholder="URL da API" required>
-        <input type="text" id="rtsp" name="rtsp" class="form-control" placeholder="IP:PORTA RTSP" required>
-        <input type="number" id="chanel" name="chanel" class="form-control" placeholder="Canal" required>
-        <input type="text" id="user" name="user" class="form-control" placeholder="Usuario" required>
+        <input type="text" id="api" name="api" class="form-control" placeholder="URL da API" value="{{ api_value }}" required>
+        <input type="text" id="rtsp" name="rtsp" class="form-control" placeholder="IP:PORTA RTSP" value="{{ ip_value }}" required>
+        <input type="number" id="chanel" name="chanel" class="form-control" placeholder="Canal" value="{{ canal_value }}" required>
+        <input type="text" id="user" name="user" class="form-control" placeholder="Usuario" value="{{ user_value }}" required>
         <input type="password" id="password" name="password" class="form-control" placeholder="Senha" required>
         
         <div class="form-group">
@@ -146,7 +181,6 @@
             </div>
          </div>
 
-        
         <button type="submit" class="img-btn">Entrar</button>
     </form>
     <div class="footer">
