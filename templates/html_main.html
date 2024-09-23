@@ -217,5 +217,23 @@
             };
         }
     </script>
+    <script>
+        if (!!window.EventSource) {
+            var source = new EventSource("/info_stream");
+            
+            source.onmessage = function(event) {
+                // Analise os dados JSON recebidos
+                var data = JSON.parse(event.data);
+                
+                // Atualize os elementos HTML com as informações recebidas
+                document.getElementById("floor-type").innerText = data.count;
+                document.getElementById("current-count").innerText = data.count;
+                document.getElementById("last-update").innerText = data.update;
+            };
+        } else {
+            console.log("Seu navegador não suporta Server-Sent Events.");
+        }
+    </script>
+
 </body>
 </html>
