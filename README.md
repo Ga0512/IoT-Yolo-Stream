@@ -21,6 +21,13 @@
 4. **Instale as dependências necessárias:**
    ```bash
    sudo apt update && sudo apt install -y libatlas-base-dev python3-pip
+
+   wget https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz
+   tar zxf Python-3.8.18.tgz
+   cd Python-3.8.18/
+   ./configure
+   make
+   sudo make install
    ```
 
 5. **Certifique-se de ter o modelo TFLite:**
@@ -38,7 +45,7 @@
 
 2. Crie um ambiente virtual (opcional):
    ```bash
-   python3 -m venv venv
+   python3.8 -m venv venv
    source venv/bin/activate
    ```
 
