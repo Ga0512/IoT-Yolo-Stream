@@ -51,7 +51,9 @@
 
 3. Instale as dependências do projeto:
    ```bash
-   sudo storage/setup.sh
+   cd storage
+   sh setup.sh
+   cd ..
    ```
 
 ---
