@@ -28,7 +28,7 @@
    ./configure
    make
    sudo make install
-   sudo apt update && sudo apt install -y libatlas-base-dev python3.3-pip
+   sudo apt update && sudo apt install -y libatlas-base-dev python3.7-pip
    ```
 
 5. **Certifique-se de ter o modelo TFLite:**
