@@ -46,7 +46,7 @@
 
 2. Crie um ambiente virtual (opcional):
    ```bash
-   python3.8 -m venv venv
+   python3 -m venv venv
    source venv/bin/activate
    ```
 
