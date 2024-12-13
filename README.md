@@ -13,7 +13,7 @@
    - Raspberry Pi OS ou outro sistema baseado em Linux com suporte a aarch64.
 
 3. **Dependências do Sistema:**
-   - Python 3.8+
+   - Python 3.7+
    - OpenCV
    - FastAPI
    - Uvicorn
@@ -22,13 +22,13 @@
    ```bash
    sudo apt install libssl-dev
 
-   wget https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz
-   tar zxf Python-3.8.18.tgz
-   cd Python-3.8.18/
+   wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
+   tar zxf Python-3.7.3.tgz
+   cd Python-3.7.3/
    ./configure
    make
    sudo make install
-   sudo apt update && sudo apt install -y libatlas-base-dev python3.8-pip
+   sudo apt update && sudo apt install -y libatlas-base-dev python3.3-pip
    ```
 
 5. **Certifique-se de ter o modelo TFLite:**
