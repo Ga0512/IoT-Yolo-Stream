@@ -20,7 +20,7 @@
 
 4. **Instale as dependências necessárias:**
    ```bash
-   sudo apt update && sudo apt install -y libatlas-base-dev python3-pip
+   sudo apt install libssl-dev
 
    wget https://www.python.org/ftp/python/3.8.18/Python-3.8.18.tgz
    tar zxf Python-3.8.18.tgz
@@ -28,6 +28,7 @@
    ./configure
    make
    sudo make install
+   sudo apt update && sudo apt install -y libatlas-base-dev python3.8-pip
    ```
 
 5. **Certifique-se de ter o modelo TFLite:**
